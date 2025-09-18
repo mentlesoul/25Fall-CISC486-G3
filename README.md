@@ -19,3 +19,13 @@ Archer (low-cost monomer)/Cannon (range sputtering)/Oil (deceleration main)/Tesl
 Enemies (First Batch Prototypes) : Trooper/Armored/Warded/Swarm/Supporter(Enhancer)/Elite Mob(Champion)
 
 Playability: The "instant route change" within Boci turns "road closure - traffic diversion - firepower coverage" into a real-time game. Loading restrictions force teammates to build complementary systems(types of towers should be complementary).
+
+## AI Plan & FSM
+
+## Scripted Event
+
+## Multiplayer Plan
+
+## Environment & Assets
+
+## Timeline
