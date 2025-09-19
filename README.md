@@ -22,21 +22,52 @@ XXX is a two-player cooperative tower defense game based on grid maps. Two playe
 
 ## AI Plan & FSM
 
-pass!!!
+**Flow:** `Spawn → Repath ↔ Move → { Goal | Dead }`
+
+### States
+
+#### Spawn
+- Initialize unit (HP, speed, drops).
+- Subscribe to **GridVersion** changes.
+- **Transition:** → **Repath** immediately.
+
+#### Repath
+- Server runs **A\*** from current cell to goal (Manhattan + small turn cost; cached).
+- **On success:** → **Move**  
+- **On failure:** short delay then retry (placement validation prevents permanent no-path).
+
+#### Move
+- Follow waypoints (speed/acceleration limits, corner smoothing, light separation).
+- **If path invalid:** → **Repath**
+
+#### Goal
+- **Regular enemies:** apply Hearts damage; despawn.  
+- **Supply Convoy:** counts as *Escaped*; apply **stacking buff** to future waves; despawn.
+
+#### Dead / Despawn
+- **HP ≤ 0:** play death FX and drops (Convoy has no Hearts damage; drops per design); despawn.
+
+### Transitions
+
+- **Spawn → Repath:** on unit creation.  
+- **Repath → Move:** when a valid path is obtained.  
+- **Move ↔ Repath:** triggered by any of:
+  - **GridVersion++** (any tower place/sell/upgrade),
+  - Next cell becomes unwalkable/occupied,
+  - Current path invalid or timed out.  
+  *Debounce with 100–200 ms jitter and a per-frame replan cap.*
+- **Move → Goal:** enters goal radius (HQ or Supply Exit).  
+- **Move → Dead:** HP ≤ 0.
 
 ## Scripted Event
 
-**Event 1: Supply Convoy**
+**Supply Convoy**: A convoy with elite guards spawns.
 
-**Condition**: Every 5th wave.
+**Condition**: Every 5 waves.
 
 **Composition**: 1× Convoy (very tanky, slow, no Hearts damage) + Guards (count scales with wave).
 
-**Effect**:
-
-If destroyed: award bonus gold to the shared pool (scales with current wave).
-
-If escaped: subsequent waves’ enemies gain a stacking buff.
+**Effect**: Award bonus gold (scales with current wave) if destroyed. Subsequent waves’ enemies gain a stacking "Well-Supplied" buff if escaped.
 
 ## Multiplayer Plan
 
@@ -58,4 +89,3 @@ If escaped: subsequent waves’ enemies gain a stacking buff.
 Prototype assets: Unity primitives, simple materials and placeholder sound effects. All of these will be replace later by Assets shop.
 
 **Debug**: F1 shows grid, A* paths, enemy FSM text (for A2 and A3).
-
